@@ -15,6 +15,17 @@ El objetivo de esta tarea es entonces :
 4. Ejecutar la aplicacion y mostar evidencia de su ejecucion y correcto funcionamiento
 5. Subir a un repositorio github personal, el archivo Dockerfile asi como evidencia de la correcta ejecucion de la aplicacion.
 
+SOLUCION
+========
+
+1. [Dockerfile](dockerfile-tarea-1/Dockerfile)
+2. https://cloud.docker.com/repository/docker/albertc87/taller1
+3. Evidencias: 
+    ![](dockerfile-tarea-1/evidencias/run.png)
+    
+    ![](dockerfile-tarea-1/evidencias/run2.png)
+
+
 
 dockerfile-tarea-2
 ---------

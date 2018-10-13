@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql:5.7
+    networks: 
+      - back-net
+    ports: 
+      - '3306:3306'
+    volumes:
+      - db-data:/var/lib/mysql
+    restart: always
+    environment:
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_DATABASE: ${MYSQL_DATABASE}
+       MYSQL_USER: ${MYSQL_USER}
+       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  
+  backend:
+    build: ./backend
+    ports:      
+      - "8080:8080" #REMOVE 
+    depends_on:
+      - db
+    networks: 
+      - back-net
+      - front-net
+    deploy:  
+      resources:  
+        limits:
+          cpus: '1'
+          memory: 128M
+        reservations:
+          cpus: '0.25'
+          memory: 50M      
+      
+volumes:
+  db-data:
+
+networks: 
+  back-net:
+  front-net:

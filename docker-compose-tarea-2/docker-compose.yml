@@ -42,6 +42,27 @@ services:
      - backend
     networks: 
      - front-net
+
+  logspout:  
+    image: gliderlabs/logspout:v3
+    command: 'udp://logstash:5000'
+    links:
+      - logstash
+    volumes:
+      - '/var/run/docker.sock:/tmp/docker.sock'
+  kibana:  
+    image: docker.elastic.co/kibana/kibana:6.4.2
+    links:
+      - 'elastic:elasticsearch'
+    ports:
+      - '5601:5601'
+  logstash:  
+    image: docker.elastic.co/logstash/logstash:6.4.2
+    command: 'logstash -e "input { udp { port => 5000 } } output { elasticsearch { hosts => elastic } }"'
+    links:
+      - elastic
+  elastic:  
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
                   
       
 volumes:

@@ -19,7 +19,7 @@ services:
   backend:
     build: ./backend
     ports:      
-      - "8080:8080" #REMOVE 
+      - "8080:8080"
     depends_on:
       - db
     networks: 
@@ -32,7 +32,17 @@ services:
           memory: 128M
         reservations:
           cpus: '0.25'
-          memory: 50M      
+          memory: 50M
+
+  frontend:
+    build: ./frontend
+    ports:
+     - "3000:3000"
+    depends_on:
+     - backend
+    networks: 
+     - front-net
+                  
       
 volumes:
   db-data:

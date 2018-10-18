@@ -9,7 +9,6 @@ services:
       - '3306:3306'
     volumes:
       - db-data:/var/lib/mysql
-    restart: always
     environment:
        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
        MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -25,6 +24,13 @@ services:
     networks: 
       - back-net
       - front-net
+    labels:
+      - traefik.enable=true
+      - traefik.backend=backend
+      - traefik.frontend.rule=Host:backend.localhost
+      - traefik.docker.network=front-net
+      - traefik.port=8080
+      - traefik.frontend.entryPoints=http,https
     deploy:  
       resources:  
         limits:
@@ -36,8 +42,12 @@ services:
 
   frontend:
     build: ./frontend
-    ports:
-     - "3000:3000"
+    labels:
+      - traefik.enable=true
+      - traefik.backend=taller2
+      - traefik.frontend.rule=Host:taller2.localhost
+      - traefik.docker.network=front-net
+      - traefik.port=3000
     depends_on:
      - backend
     networks: 
@@ -46,25 +56,68 @@ services:
   logspout:  
     image: gliderlabs/logspout:v3
     command: 'udp://logstash:5000'
+    networks: 
+      - front-net
     links:
       - logstash
     volumes:
       - '/var/run/docker.sock:/tmp/docker.sock'
-  kibana:  
+  kibana:
     image: docker.elastic.co/kibana/kibana:6.4.2
+    networks: 
+      - front-net
     links:
       - 'elastic:elasticsearch'
-    ports:
-      - '5601:5601'
+    labels:  
+      - traefik.enable=true  
+      - traefik.backend=kibana
+      - traefik.frontend.rule=Host:kibana.localhost
+      - traefik.port=5601
+      - traefik.docker.network=front-net
+      - traefik.frontend.entryPoints=http,https
   logstash:  
     image: docker.elastic.co/logstash/logstash:6.4.2
+    networks: 
+      - front-net
     command: 'logstash -e "input { udp { port => 5000 } } output { elasticsearch { hosts => elastic } }"'
     links:
       - elastic
   elastic:  
     image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
+    networks: 
+      - front-net
                   
-      
+  lb:
+    image: traefik:1.7-alpine
+    depends_on:
+      - frontend
+    command: 
+      - --web 
+      - --docker       
+      - --docker.domain=localhost
+      - --logLevel=DEBUG
+      - --docker.watch
+      - --entryPoints=Name:http Address::80 
+      - --entryPoints=Name:https Address::443 TLS:/certs/server.crt,/certs/server.key
+      - --defaultentrypoints=http,https
+    networks: 
+      - front-net
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8888:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.backend=traefik      
+      - traefik.frontend.rule=Host:traefik.localhost 
+      - traefik.port=8080
+    depends_on:
+      - frontend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev/null:/traefik.toml
+      - ./traefik/certs:/certs/
+    
 volumes:
   db-data:
 

@@ -1,4 +1,4 @@
-var baseURL = "http://localhost:8080/api"
+var baseURL = "http://backend.localhost/api"
 $(document).ready(function() {
     $('#users').DataTable( {
         ajax: {

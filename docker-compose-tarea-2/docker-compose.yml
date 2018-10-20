@@ -30,7 +30,7 @@ services:
       - traefik.frontend.rule=Host:backend.localhost
       - traefik.docker.network=front-net
       - traefik.port=8080
-      - traefik.frontend.entryPoints=http,https
+      #- traefik.frontend.entryPoints=http,https
     deploy:  
       resources:  
         limits:
@@ -63,7 +63,10 @@ services:
     volumes:
       - '/var/run/docker.sock:/tmp/docker.sock'
   kibana:
+    ports:      
+      - "5601:5601"
     image: docker.elastic.co/kibana/kibana:6.4.2
+
     networks: 
       - front-net
     links:
@@ -74,7 +77,7 @@ services:
       - traefik.frontend.rule=Host:kibana.localhost
       - traefik.port=5601
       - traefik.docker.network=front-net
-      - traefik.frontend.entryPoints=http,https
+      #- traefik.frontend.entryPoints=http,https
   logstash:  
     image: docker.elastic.co/logstash/logstash:6.4.2
     networks: 
@@ -97,9 +100,9 @@ services:
       - --docker.domain=localhost
       - --logLevel=DEBUG
       - --docker.watch
-      - --entryPoints=Name:http Address::80 
-      - --entryPoints=Name:https Address::443 TLS:/certs/server.crt,/certs/server.key
-      - --defaultentrypoints=http,https
+      #- --entryPoints=Name:http Address::80 
+      #- --entryPoints=Name:https Address::443 TLS:/certs/server.crt,/certs/server.key
+      #- --defaultentrypoints=http,https
     networks: 
       - front-net
     ports:
